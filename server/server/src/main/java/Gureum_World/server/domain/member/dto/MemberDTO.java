@@ -1,17 +1,14 @@
 package Gureum_World.server.domain.member.dto;
 
-import Gureum_World.server.domain.post.entity.Post;
-import jakarta.persistence.Column;
-import jakarta.persistence.OneToMany;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
+
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+
 
 @Data
 @NoArgsConstructor
@@ -34,13 +31,13 @@ public class MemberDTO {
 
     private Long total;
 
-    private String level;
+    private Long level;
 
     private String color;
 
     private String background;
 
-    private String upgrade;
+    private Long upgrade;
 
     private String role;
 

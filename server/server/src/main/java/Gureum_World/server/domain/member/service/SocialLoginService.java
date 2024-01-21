@@ -52,10 +52,10 @@ public class SocialLoginService {
                     .intro("intro")
                     .today(0L)
                     .total(0L)
-                    .level("1")
+                    .level(1L)
                     .link("link")
                     .color("color")
-                    .upgrade("upgrade")
+                    .upgrade(0L)
                     .nickname("nickname")
                     .build();
             return String.valueOf(memberRepository.saveAndFlush(newUser));
