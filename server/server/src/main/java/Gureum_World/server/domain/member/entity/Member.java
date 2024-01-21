@@ -52,7 +52,7 @@ public class Member extends BaseEntity implements UserDetails {
     private Long total;
 
     @Column(name = "level", nullable = true)
-    private String level;
+    private Long level;
 
     @Column(name = "color", nullable = true)
     private String color;
@@ -61,7 +61,7 @@ public class Member extends BaseEntity implements UserDetails {
     private String background;
 
     @Column(name = "upgrade", nullable = true)
-    private String upgrade;
+    private Long upgrade;
 
     @Column(name = "login_at", nullable = true)
     private LocalDateTime login_at;

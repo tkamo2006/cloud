@@ -34,13 +34,13 @@ public class MemberDTO {
 
     private Long total;
 
-    private String level;
+    private Long level;
 
     private String color;
 
     private String background;
 
-    private String upgrade;
+    private Long upgrade;
 
     private String role;
 
