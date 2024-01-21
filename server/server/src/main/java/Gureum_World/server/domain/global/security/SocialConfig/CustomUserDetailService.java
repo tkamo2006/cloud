@@ -21,10 +21,10 @@ public class CustomUserDetailService implements UserDetailsService {
 //    }
 
 
-    // 유저의 이메일로 찾기
+    // 유저의 이름으로 찾기
     @Override
-    public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
-        return (UserDetails) memberRepository.findByName(name)
+    public UserDetails loadUserByUsername(String kakaoId) throws UsernameNotFoundException {
+        return memberRepository.findByKakaoId(kakaoId)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
     }
 }

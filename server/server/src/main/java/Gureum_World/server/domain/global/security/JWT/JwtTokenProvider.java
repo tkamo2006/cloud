@@ -134,6 +134,5 @@ public class JwtTokenProvider {
                 .parseClaimsJws(jwtToken)
                 .getBody()
                 .getSubject();
-
     }
 }
