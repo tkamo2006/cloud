@@ -25,12 +25,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
 
-        Map<String, Object> kakao_account = (Map<String, Object>) oAuth2User.getAttributes().get("kakao_account");
-        String email = (String) kakao_account.get("email");
         Map<String, Object> properties = (Map<String, Object>) oAuth2User.getAttributes().get("properties");
         String nickname = (String) properties.get("nickname");
+        String kakaoId = oAuth2User.getName();
 
-        TokenDTO accessToken = jwtTokenProvider.createAccessToken(email, String.valueOf(RoleType.USER));
+        TokenDTO accessToken = jwtTokenProvider.createAccessToken(kakaoId, String.valueOf(RoleType.USER));
 
         String url = makeRedirectUrl(accessToken.getToken());
 
