@@ -66,7 +66,7 @@ public class MemberService {
         if (user.getBackground() != null) {
             userEntity.setBackground(user.getBackground());
         }
-        userEntity.setLink("http://localhost:8080/"+user.getNickname());
+        userEntity.setLink("http://localhost:8080/"+user.getKakaoId());
 
         return Optional.of(memberRepository.saveAndFlush(userEntity));
     }
@@ -84,18 +84,13 @@ public class MemberService {
         if (userEntity.getLevel() < 5) {
             switch (userEntity.getLevel().intValue()) {
                 case 1 -> requiredPoints = 100;
-                case 2 -> requiredPoints = 200;
-                case 3 -> requiredPoints = 500;
-                case 4 -> requiredPoints = 1000;
+                case 2 -> requiredPoints = 300;
             }
 
             if (userEntity.getUpgrade() >= requiredPoints) {
                 // 충분한 포인트가 있을 경우 레벨 업그레이드
                 userEntity.setLevel(userEntity.getLevel() + 1);
-                userEntity.setUpgrade(userEntity.getUpgrade() - requiredPoints);
-
                 memberRepository.save(userEntity);
-                userEntity.setLevel(userEntity.getLevel());
             } else {
                 // 필요한 추가 포인트 반환
                 userLevel.setNeedPoint(requiredPoints - userEntity.getUpgrade());
