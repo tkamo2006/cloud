@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
@@ -28,7 +30,6 @@ public class SocialLoginService {
     public String socialLogin(String name, Long id) {
         Optional<Member> optionalUserEntity = memberRepository.findByKakaoId(String.valueOf(id));
         if (optionalUserEntity.isPresent()) {
-
             Member userEntity = optionalUserEntity.get();
             userEntity.setLogin_at(new Timestamp(System.currentTimeMillis()).toLocalDateTime());
             userEntity.setLogin_cnt(userEntity.getLogin_cnt()+1);
@@ -40,6 +41,7 @@ public class SocialLoginService {
             // Redis 에 RTL user@email.com(key) : ----token-----(value) 형태로 token 저장
             redisTemplate.opsForValue().set("RT:"+id, token.getToken(), token.getTokenExpiresTime().getTime(), TimeUnit.MILLISECONDS);
             return token.getToken();
+//            return ResponseEntity.ok(token.getToken());
         }
         else {
             Member newUser = Member.builder()
@@ -58,7 +60,10 @@ public class SocialLoginService {
                     .upgrade(0L)
                     .nickname("nickname")
                     .build();
-            return String.valueOf(memberRepository.saveAndFlush(newUser));
+            memberRepository.saveAndFlush(newUser);
+            return String.valueOf(HttpStatus.CREATED.value());
+//            return ResponseEntity.status(HttpStatus.CREATED).body(String.valueOf(newUser.getUserId()));
+
         }
     }
 }

@@ -1,6 +1,7 @@
 package Gureum_World.server.domain.member.controller;
 
 import Gureum_World.server.domain.member.dto.OAuthToken;
+import Gureum_World.server.domain.member.entity.Member;
 import Gureum_World.server.domain.member.service.SocialLoginService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,10 +16,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.Optional;
 
 @Log4j2
 @RestController
@@ -35,8 +36,9 @@ public class SocialLoginController {
     @Autowired
     private SocialLoginService socialLoginService;
     // ----- 소셜 로그인 관련
-    @GetMapping("/oauth2/kakao")
-    public @ResponseBody String kakaoCallback(String code) throws ParseException {
+    @CrossOrigin(origins = "http://localhost:5173")
+    @PostMapping("/oauth")
+    public String kakaoCallback(@RequestBody String code) throws ParseException {
 
         RestTemplate rt = new RestTemplate();
 
@@ -49,7 +51,7 @@ public class SocialLoginController {
         params.add("client_secret", clientSecret);
         params.add("redirect_uri", redirectUri);
         params.add("code", code);
-
+        System.out.println("code :  " + code);
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(params, headers);
 
         ResponseEntity<String> response = rt.exchange(
@@ -90,10 +92,7 @@ public class SocialLoginController {
         JSONObject kakaoAccount = profileJson.getJSONObject("kakao_account");
         String name = kakaoAccount.getJSONObject("profile").getString("nickname");
 
-        log.info(socialLoginService.socialLogin(name, kakaoId));
-
-
-        return response2.getBody();
+        return socialLoginService.socialLogin(name, kakaoId);
 
     }
 }
