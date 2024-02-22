@@ -17,6 +17,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.TemporalAmount;
 import java.util.Base64;
 import java.util.Date;
 
@@ -40,39 +45,79 @@ public class JwtTokenProvider {
 
 
     // JWT Access 토큰 생성
+//    public TokenDTO createAccessToken(String email, String roles) {
+//        // Access 토큰 유효시간 30분
+//        long tokenValidTime = 30 * 60 * 1000L;
+//
+//        Claims claims = Jwts.claims().setSubject(String.valueOf(email)); // JWT payload 에 저장되는 정보단위
+//        claims.put("roles", roles); // 정보는 key : value 쌍으로 저장된다.
+//        claims.put("types", "atk");
+//        Date now = new Date();
+//        Date expiresTime = new Date(now.getTime() + tokenValidTime);
+//        String token = Jwts.builder()
+//                .setClaims(claims) // 정보 저장
+//                .setIssuedAt(now) // 토큰 발행 시간 정보
+//                .setExpiration(expiresTime) // Expire Time 설정
+//                .signWith(SignatureAlgorithm.HS256, secretKey) // 사용할 암호화 알고리즘과 signature 에 들어갈 secretkey 값 설정
+//                .compact();
+//        return new TokenDTO(String.valueOf(TokenType.atk), token, expiresTime);
+//    }
+//
+//    public TokenDTO createRefreshToken(String kakaoId) {
+//        // Refresh 토큰 유효시간 2주
+//        long tokenValidTime = 60 * 60 * 24 * 14 * 1000L;
+//
+//        Claims claims = Jwts.claims().setSubject(kakaoId);
+//
+//        Date now = new Date();
+//        Date expiresTime = new Date(now.getTime() + tokenValidTime); // 토큰 만료 시간
+//
+//        String token = Jwts.builder()
+//                .setClaims(claims) // 정보 저장
+//                .setIssuedAt(now) // 토큰 발행 시간 정보
+//                .setExpiration(expiresTime) // Expire Time 설정
+//                .signWith(SignatureAlgorithm.HS256, secretKey) // 사용할 암호화 알고리즘과 signature 에 들어갈 secretkey 값 설정
+//                .claim("types", "rtk")
+//                .compact();
+//        return new TokenDTO(String.valueOf(TokenType.rtk),token, expiresTime);
+//    }
     public TokenDTO createAccessToken(String email, String roles) {
-        // Access 토큰 유효시간 30분
-        long tokenValidTime = 30 * 60 * 1000L;
+        TemporalAmount tokenValidDuration = java.time.Duration.ofMinutes(30);
 
-        Claims claims = Jwts.claims().setSubject(String.valueOf(email)); // JWT payload 에 저장되는 정보단위
-        claims.put("roles", roles); // 정보는 key : value 쌍으로 저장된다.
+        Claims claims = Jwts.claims().setSubject(String.valueOf(email));
+        claims.put("roles", roles);
         claims.put("types", "atk");
-        Date now = new Date();
-        Date expiresTime = new Date(now.getTime() + tokenValidTime);
+
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul")); // 한국 시간대로 현재 시간 얻기
+        Instant expiresTime = now.plus(tokenValidDuration).toInstant();
+
         String token = Jwts.builder()
-                .setClaims(claims) // 정보 저장
-                .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(expiresTime) // Expire Time 설정
-                .signWith(SignatureAlgorithm.HS256, secretKey) // 사용할 암호화 알고리즘과 signature 에 들어갈 secretkey 값 설정
+                .setClaims(claims)
+                .setIssuedAt(Date.from(now.toInstant()))
+                .setExpiration(Date.from(expiresTime))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
-        return new TokenDTO(String.valueOf(TokenType.atk), token, expiresTime);
+
+        return new TokenDTO(String.valueOf(TokenType.atk), token, Date.from(expiresTime));
     }
 
-    // JWT Refresh 토큰 생성
-    public TokenDTO createRefreshToken() {
+    public TokenDTO createRefreshToken(String kakaoId) {
+        TemporalAmount tokenValidDuration = java.time.Duration.ofDays(14);
 
-        // Refresh 토큰 유효시간 2주
-        long tokenValidTime = 60 * 60 * 14 * 1000L;
+        Claims claims = Jwts.claims().setSubject(kakaoId);
 
-        Date now = new Date();
-        Date expiresTime = new Date(now.getTime() + tokenValidTime);
+        ZonedDateTime now = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        Instant expiresTime = now.plus(tokenValidDuration).toInstant();
+
         String token = Jwts.builder()
-                .setIssuedAt(now) // 토큰 발행 시간 정보
-                .setExpiration(expiresTime) // Expire Time 설정
-                .signWith(SignatureAlgorithm.HS256, secretKey) // 사용할 암호화 알고리즘과 signature 에 들어갈 secretkey 값 설정
+                .setClaims(claims)
+                .setIssuedAt(Date.from(now.toInstant()))
+                .setExpiration(Date.from(expiresTime))
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .claim("types", "rtk")
                 .compact();
-        return new TokenDTO(String.valueOf(TokenType.rtk),token, expiresTime);
+
+        return new TokenDTO(String.valueOf(TokenType.rtk), token, Date.from(expiresTime));
     }
 
     // JWT 토큰에서 인증 정보 조회
