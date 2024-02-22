@@ -1,6 +1,6 @@
 package Gureum_World.server.domain.member.controller;
 
-import Gureum_World.server.domain.member.dto.OAuthToken;
+import Gureum_World.server.domain.member.dto.*;
 import Gureum_World.server.domain.member.entity.Member;
 import Gureum_World.server.domain.member.service.SocialLoginService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -18,7 +18,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Log4j2
@@ -35,10 +38,45 @@ public class SocialLoginController {
 
     @Autowired
     private SocialLoginService socialLoginService;
-    // ----- 소셜 로그인 관련
-    @CrossOrigin(origins = "http://localhost:5173")
+
+    @Value("${spring.security.oauth2.client.registration.google.client-id}")
+    private String googleClientId;
+    @Value("${spring.security.oauth2.client.registration.google.client-secret}")
+    private String googleClientPw;
+
+    @CrossOrigin(origins = {"https://cloudworld.vercel.app", "http://localhost:5173"})
+    @RequestMapping(value="/google/oauth", method = RequestMethod.POST)
+    public SocialDTO.socialRes loginGoogle(@RequestBody String jwtToken){
+        RestTemplate restTemplate = new RestTemplate();
+//        GoogleRequest googleOAuthRequestParam = GoogleRequest
+//                .builder()
+//                .clientId(googleClientId)
+//                .clientSecret(googleClientPw)
+//                .code(authCode)
+//                .redirectUri("http://localhost:5173/google/oauth")
+//                .grantType("authorization_code").build();
+//        ResponseEntity<GoogleResponse> resultEntity = restTemplate.postForEntity("https://oauth2.googleapis.com/token",
+//                googleOAuthRequestParam, GoogleResponse.class);
+//        String jwtToken=resultEntity.getBody().getId_token();
+
+        Map<String, String> map=new HashMap<>();
+        map.put("id_token",jwtToken);
+        ResponseEntity<GoogleInfResponse> resultEntity2 = restTemplate.postForEntity("https://oauth2.googleapis.com/tokeninfo",
+                map, GoogleInfResponse.class);
+
+//        String requestUrl = UriComponentsBuilder.fromHttpUrl("https://oauth2.googleapis.com/tokeninfo").queryParam("id_token",jwtToken).toUriString();
+//        String resultJson = restTemplate.getForObject(requestUrl, String.class);
+        
+        String name = resultEntity2.getBody().getName();
+        String kakaoId = resultEntity2.getBody().getSub();
+        String image = resultEntity2.getBody().getPicture();
+        log.info("구글 로그인 요청 ");
+        return socialLoginService.SocialLogin(name, kakaoId, image);
+    }
+
+    @CrossOrigin(origins = {"https://cloudworld.vercel.app", "http://localhost:5173"})
     @PostMapping("/oauth")
-    public String kakaoCallback(@RequestBody String code) throws ParseException {
+    public SocialDTO.socialRes KakaoCallback(@RequestBody String code) throws ParseException {
 
         RestTemplate rt = new RestTemplate();
 
@@ -51,7 +89,7 @@ public class SocialLoginController {
         params.add("client_secret", clientSecret);
         params.add("redirect_uri", redirectUri);
         params.add("code", code);
-        System.out.println("code :  " + code);
+//        System.out.println("code :  " + code);
         HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(params, headers);
 
         ResponseEntity<String> response = rt.exchange(
@@ -69,7 +107,7 @@ public class SocialLoginController {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        System.out.println("카카오 액세스 토큰 : " + oAuthToken.getAccess_token());
+//        System.out.println("카카오 액세스 토큰 : " + oAuthToken.getAccess_token());
 
         RestTemplate rt2 = new RestTemplate();
 
@@ -91,8 +129,9 @@ public class SocialLoginController {
         Long kakaoId = profileJson.getLong("id");
         JSONObject kakaoAccount = profileJson.getJSONObject("kakao_account");
         String name = kakaoAccount.getJSONObject("profile").getString("nickname");
-
-        return socialLoginService.socialLogin(name, kakaoId);
+        String image = kakaoAccount.getJSONObject("profile").getString("profile_image_url");
+        log.info("카카오 로그인 요청 ");
+        return socialLoginService.SocialLogin(name, String.valueOf(kakaoId), image);
 
     }
 }

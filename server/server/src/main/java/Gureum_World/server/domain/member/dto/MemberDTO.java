@@ -41,6 +41,10 @@ public class MemberDTO {
 
     private String role;
 
+    private String image;
+
+    private Long percent;
+
     private char status;
 
     private LocalDateTime login_at;
