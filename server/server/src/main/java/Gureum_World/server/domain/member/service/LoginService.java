@@ -69,11 +69,11 @@ public class LoginService {
         memberRepository.saveAndFlush(member);
 
         // token 발급
-        TokenDTO refreshToken = jwtTokenProvider.createRefreshToken();
+        TokenDTO refreshToken = jwtTokenProvider.createRefreshToken(member.getKakaoId());
         TokenDTO accessToken = jwtTokenProvider.createAccessToken(member.getKakaoId(), member.getRole());
 
         // login 시 Redis 에 RT: user@email.com(key) : ----token-----(value) 형태로 token 저장
-        redisTemplate.opsForValue().set("RT:"+member.getKakaoId(), accessToken.getToken(), accessToken.getTokenExpiresTime().getTime(), TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set("RT:"+member.getKakaoId(), refreshToken.getToken(), refreshToken.getTokenExpiresTime().getTime(), TimeUnit.MILLISECONDS);
 //        redisTemplate.opsForValue().set("RT:"+userEntity.getEmail(), refreshToken.getToken(), refreshToken.getTokenExpiresTime().getTime(), TimeUnit.MILLISECONDS);
 
         List<TokenDTO> tokenDTOList = new ArrayList<>();
