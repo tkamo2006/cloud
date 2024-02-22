@@ -3,30 +3,38 @@ package Gureum_World.server.domain.reply.entity;
 import Gureum_World.server.domain.BaseEntity;
 import Gureum_World.server.domain.member.entity.Member;
 import Gureum_World.server.domain.post.entity.Post;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @Entity
 @NoArgsConstructor
 @Table(name = "reply")
-public class Reply extends BaseEntity {
+public class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "replyId")
-    private Long id;
+    @Column(name = "reply_id")
+    private Long replyId;
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "postId")
+    @JoinColumn(name = "post_id")
     private Post postId;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
-    private Member userId;
+//    @JsonIgnore
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "userId")
+//    private Member userId;
 
-
+    private Long replyIdx;
+    private String kakaoId;
+    private String nickname;
+    private String link;
     private String context;
     private String status;
-    private LocalDateTime created_at;
+    private String created;
 }
