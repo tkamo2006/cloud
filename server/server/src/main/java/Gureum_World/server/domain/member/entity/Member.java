@@ -77,7 +77,13 @@ public class Member extends BaseEntity implements UserDetails {
     @Column(name = "role", nullable = true) // User
     private String role;
 
-    @OneToMany(mappedBy = "userId")
+    @Column(name = "image", nullable = true) // User
+    private String image;
+
+    @Column(name = "percent", nullable = true) // User
+    private Long percent;
+
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 //    @OneToMany(mappedBy = "userId")
 //    private List<Reply> replies = new ArrayList<>();
@@ -99,6 +105,8 @@ public class Member extends BaseEntity implements UserDetails {
                 .upgrade(upgrade)
                 .nickname(nickname)
                 .role(role)
+                .percent(percent)
+                .image(image)
                 .status(status)
                 .login_at(login_at)
                 .login_cnt(login_cnt)
