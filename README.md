@@ -131,9 +131,9 @@
 
 <h3>Back-End</h3>
 
-|  JAVA   |SpringBoot| SpringSecurity |  JPA   |   MYSQL   |  JWT   |
-| :-----: | :-------: | :--------: | :------: | :-----: | :-----: | 
-| <img src=https://github.com/codestates-seb/seb44_main_034/raw/README/images/stack/java.svg width=60px height=60px> |<img src="https://github.com/codestates-seb/seb44_main_034/assets/111395967/48fb4b1c-16db-43f5-9d72-1ac2ff7a640d" width ="80" height ="50">|<img src="https://github.com/codestates-seb/seb44_main_034/assets/111395967/3183de14-78c3-41ea-8812-f9cfc1965ece" width ="80" height ="50"> |<img src="https://github.com/codestates-seb/seb44_main_034/assets/111395967/78414aad-c1af-4bcb-a2f7-8f6703c87b96" width ="80" height ="50">  |<img src="https://github.com/codestates-seb/seb44_main_034/assets/111395967/e92edcd5-6dca-4e63-b006-2b1b7973b2dc" width ="80" height ="50"> |<img src="https://github.com/codestates-seb/seb44_main_034/assets/111395967/80fe6786-8c00-4080-890d-b2a207dc5889" width ="80" height ="50">  |
+|  JAVA   |SpringBoot| SpringSecurity |  JPA   |   MYSQL   |  JWT   |  Redis  |
+| :-----: | :-------: | :--------: | :------: | :-----: | :-----: |  :-----: | 
+| <img src=https://github.com/codestates-seb/seb44_main_034/raw/README/images/stack/java.svg width=60px height=60px> |<img src="https://github.com/codestates-seb/seb44_main_034/assets/111395967/48fb4b1c-16db-43f5-9d72-1ac2ff7a640d" width ="80" height ="50">|<img src="https://github.com/codestates-seb/seb44_main_034/assets/111395967/3183de14-78c3-41ea-8812-f9cfc1965ece" width ="80" height ="50"> |<img src="https://github.com/codestates-seb/seb44_main_034/assets/111395967/78414aad-c1af-4bcb-a2f7-8f6703c87b96" width ="80" height ="50">  |<img src="https://github.com/codestates-seb/seb44_main_034/assets/111395967/e92edcd5-6dca-4e63-b006-2b1b7973b2dc" width ="80" height ="50"> |<img src="https://github.com/codestates-seb/seb44_main_034/assets/111395967/80fe6786-8c00-4080-890d-b2a207dc5889" width ="80" height ="50">  |<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbUK9zKHUR4qd8vmLVF6jR1KkE_2QKavVDgg&usqp=CAU" width ="80" height ="50">  |
 
 <hr>
 
