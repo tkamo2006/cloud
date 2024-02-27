@@ -44,6 +44,7 @@ public class UserRes {
         private Long percent;
         private String image;
         private String status;
+        private boolean bookmark;
     }
     @NoArgsConstructor
     @AllArgsConstructor

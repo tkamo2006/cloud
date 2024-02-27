@@ -3,9 +3,13 @@ package Gureum_World.server.domain.member.service;
 import Gureum_World.server.domain.global.BaseException;
 import Gureum_World.server.domain.global.security.JWT.JwtTokenProvider;
 import Gureum_World.server.domain.global.security.JWT.TokenDTO;
+import Gureum_World.server.domain.member.dto.FollowReq;
+import Gureum_World.server.domain.member.dto.FollowRes;
 import Gureum_World.server.domain.member.dto.MemberDTO;
 import Gureum_World.server.domain.member.dto.UserRes;
 import Gureum_World.server.domain.member.entity.Member;
+import Gureum_World.server.domain.member.entity.MemberFollow;
+import Gureum_World.server.domain.member.repository.MemberFollowRepository;
 import Gureum_World.server.domain.member.repository.MemberRepository;
 import Gureum_World.server.domain.post.repository.PostRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,11 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static Gureum_World.server.domain.global.BaseResponseStatus.*;
 
@@ -33,6 +39,8 @@ public class MemberService {
     private JwtTokenProvider jwtTokenProvider;
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private MemberFollowRepository memberFollowRepository;
 
     public String logout(HttpServletRequest request) {
         try {
@@ -71,6 +79,8 @@ public class MemberService {
 
         Member user = memberRepository.findByKakaoId(userId)
                 .orElseThrow(() -> new BaseException(FAILED_TO_LOGIN));
+        Member userEntity = memberRepository.findByKakaoId(jwtId)
+                .orElse(null);
 
         UserRes.UserInfoRole userInfo = new UserRes.UserInfoRole();
         if(jwtId.equals(userId)){
@@ -78,7 +88,10 @@ public class MemberService {
         }else{
             userInfo.setStatus("guest");
         }
-
+        if(userEntity != null){
+            MemberFollow memberFollow = memberFollowRepository.findByUserIdAndKakaoId(userEntity,userId);
+            userInfo.setBookmark(memberFollow != null);
+        }
 
         Long PostCnt = postRepository.countByUserId(user);
 
@@ -180,7 +193,7 @@ public class MemberService {
         long requiredPoints = 0;
         UserRes.UserLevel userLevel = new UserRes.UserLevel();
 
-        if (userEntity.getLevel() < 5) {
+        if (userEntity.getLevel() < 3) {
             switch (userEntity.getLevel().intValue()) {
                 case 1 -> requiredPoints = 100;
                 case 2 -> requiredPoints = 300;
@@ -209,7 +222,7 @@ public class MemberService {
 
         long requiredPoints = 0;
 
-        if (userEntity.getLevel() < 5) {
+        if (userEntity.getLevel() < 3) {
             switch (userEntity.getLevel().intValue()) {
                 case 1 -> requiredPoints = 100;
                 case 2 -> requiredPoints = 300;
@@ -221,6 +234,7 @@ public class MemberService {
                 String newCh = String.valueOf(userEntity.getLevel()+1);
                 userEntity.setColor(userEntity.getColor().replace(oldCh, newCh));
                 userEntity.setLevel(userEntity.getLevel() + 1);
+                userEntity.setUpgrade(0L);
                 memberRepository.save(userEntity);
                 result = "레벨업 성공";
             }else{
@@ -270,5 +284,69 @@ public class MemberService {
         return tokenDTOList;
     }
 
+    public Optional<MemberFollow> createbook(FollowReq.FollowKakaoIdReq userId, HttpServletRequest request) throws Exception {
+        String kakaoId = jwtTokenProvider.getCurrentUser(request);
+        Member userEntity = memberRepository.findByKakaoId(kakaoId).orElse(null);
+        if (userEntity == null) {
+            throw new Exception("사용자를 찾을 수 없습니다.");
+        }
 
+        if (memberFollowRepository.existsByUserIdAndKakaoId(userEntity, userId.getKakaoId())) {
+            throw new Exception("이미 북마크가 존재합니다.");
+        }
+        MemberFollow memberFollow = new MemberFollow();
+
+        memberFollow.setFollowIdx(memberFollowRepository.countByUserId(userEntity)+1);
+        memberFollow.setUserId(userEntity);
+        memberFollow.setBookMark(true);
+        memberFollow.setKakaoId(userId.getKakaoId());
+
+        return Optional.of(memberFollowRepository.saveAndFlush(memberFollow));
+    }
+    @Transactional
+    public Optional<MemberFollow> deletebook(FollowReq.FollowKakaoIdReq userId, HttpServletRequest request) throws Exception {
+        String kakaoId = jwtTokenProvider.getCurrentUser(request);
+        Member userEntity = memberRepository.findByKakaoId(kakaoId).orElse(null);
+        if (userEntity == null) {
+            throw new Exception("사용자를 찾을 수 없습니다.");
+        }
+
+        MemberFollow memberFollow = memberFollowRepository.findByUserIdAndKakaoId(userEntity, userId.getKakaoId());
+
+        if(memberFollow == null){
+            throw new Exception("북마크 되어있지 않습니다.");
+        }
+        memberFollowRepository.delete(memberFollow);
+
+        return Optional.of(memberFollow);
+    }
+
+    public List<FollowRes.FollowListRes> getAllMemberFollow(HttpServletRequest request) throws Exception {
+        String kakaoId = jwtTokenProvider.getCurrentUser(request);
+        Member userEntity = memberRepository.findByKakaoId(kakaoId).orElse(null);
+        if (userEntity == null) {
+            throw new Exception("사용자를 찾을 수 없습니다.");
+        }
+
+        List<MemberFollow> memberFollows = memberFollowRepository.findByUserId(userEntity);
+
+        return memberFollows.stream()
+                .map(memberFollow -> {
+
+                    try {
+                        Member writer = memberRepository.findByKakaoId(memberFollow.getKakaoId())
+                                .orElseThrow(() -> new BaseException(FAILED_TO_LOGIN));
+
+                        return new FollowRes.FollowListRes(
+                                writer.getName(),
+                                writer.getLink(),
+                                writer.getImage()
+                        );
+                    } catch (BaseException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                })
+                .collect(Collectors.toList());
+    }
 }

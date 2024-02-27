@@ -159,7 +159,6 @@ public class PostService {
 
         int currentPage = postPage.getNumber();
         int totalPages = postPage.getTotalPages();
-
         // 페이지 번호가 total 페이지를 초과하면 수정
         if (currentPage >= totalPages) {
             // 혹은 원하는 로직으로 수정
@@ -287,7 +286,6 @@ public class PostService {
         }else {
             throw new Exception("삭제할 수 없습니다.");
         }
-
     }
 
 

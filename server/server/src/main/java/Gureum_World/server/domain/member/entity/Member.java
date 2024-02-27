@@ -14,9 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Entity(name = "Member")
 @Table(name = "Member")
@@ -88,8 +86,10 @@ public class Member extends BaseEntity implements UserDetails {
 //    @OneToMany(mappedBy = "userId")
 //    private List<Reply> replies = new ArrayList<>();
 
-    private LocalDateTime created_at;
+    @OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<MemberFollow> memberFollows = new ArrayList<>();
 
+    private LocalDateTime created_at;
 
     public MemberDTO toDTO() {
         return MemberDTO.builder()
